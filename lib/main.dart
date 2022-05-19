@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:my_notes/firebase_options.dart';
 import 'package:my_notes/views/login_view.dart';
 import 'package:my_notes/views/register_view.dart';
+import 'package:my_notes/views/verify_email_view.dart';
+import 'dart:developer' as devtools show log;
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,9 +15,9 @@ void main() {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomePage(),
+      home: const HomePage(),
       routes: {
-        '/login/': (context) => LoginView(),
+        '/login/': (context) => const LoginView(),
         '/register/': (context) => RegisterView(),
       },
     ),
@@ -36,25 +38,16 @@ class HomePage extends StatelessWidget {
               final User = FirebaseAuth.instance.currentUser;
               if (User != null) {
                 if (User.emailVerified) {
-                  print('email is verified');
+                  return NoteView();
+                  // print('email is verified');
                 } else {
-                  return VerticalDivider();
+                  return verifyEmailView();
                 }
               } else {
-                return LoginView();
+                return const LoginView();
               }
-              return Text('dine');
-              // final user = FirebaseAuth.instance.currentUser;
-              // print(user);
-              // if (user?.emailVerified ?? false) {
-              //   // print('You are a verified user');
-              //   return const Text('Done');
-              // } else {
-              //   // print('You need to verify your emaiol first');
 
-              //   return verifyEmailView();
-              // }
-              return LoginView();
+            // return Text('done');
 
             default:
               return const Text('isLoading');
@@ -63,9 +56,75 @@ class HomePage extends StatelessWidget {
   }
 }
 
+enum MenuAction { logout }
 
-  // Navigator.of(context).push(
-  //                 MaterialPageRoute(
-  //                   builder: (context) => verifyEmailView(),
-  //                 ),
-  //               );
+class NoteView extends StatefulWidget {
+  NoteView({Key? key}) : super(key: key);
+
+  @override
+  State<NoteView> createState() => _NoteViewState();
+}
+
+class _NoteViewState extends State<NoteView> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Main Ui'),
+        actions: [
+          PopupMenuButton<MenuAction>(onSelected: (value) async {
+            switch (value) {
+              case MenuAction.logout:
+                final shouldLogout = await showlogOutDialog(context);
+                if (shouldLogout) {
+                  await FirebaseAuth.instance.signOut();
+                  Navigator.of(context)
+                      .pushNamedAndRemoveUntil('/login/', (_) => false);
+                }
+                devtools.log(shouldLogout.toString());
+                // TODO: Handle this case.
+                break;
+            }
+
+            // devtools.log(
+            //   value.toString(),
+            // );
+          }, itemBuilder: (context) {
+            return [
+              const PopupMenuItem<MenuAction>(
+                value: MenuAction.logout,
+                child: Text('logout'),
+              )
+            ];
+          })
+        ],
+      ),
+      body: const Text('hello world'),
+    );
+  }
+}
+
+Future<bool> showlogOutDialog(BuildContext context) {
+  return showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Sign Out'),
+          content: const Text('Are you sure you want to signout'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text('cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text('log out'),
+            ),
+          ],
+        );
+      }).then((value) => value ?? false);
+}
