@@ -19,6 +19,7 @@ void main() {
       routes: {
         '/login/': (context) => const LoginView(),
         '/register/': (context) => RegisterView(),
+        '/notes/': (context) => NoteView(),
       },
     ),
   );
@@ -87,7 +88,7 @@ class _NoteViewState extends State<NoteView> {
             }
 
             // devtools.log(
-            //   value.toString(),
+            //   value.toString(),'/login/'
             // );
           }, itemBuilder: (context) {
             return [
