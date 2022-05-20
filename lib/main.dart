@@ -21,6 +21,7 @@ void main() {
         loginRoute: (context) => const LoginView(),
         registerRoute: (context) => RegisterView(),
         noteRoute: (context) => NoteView(),
+        verifyEmailRoute: (context) => verifyEmailView(),
       },
     ),
   );
@@ -52,7 +53,8 @@ class HomePage extends StatelessWidget {
             // return Text('done');
 
             default:
-              return const Text('isLoading');
+              return const CircularProgressIndicator();
+            // Text('isLoading');
           }
         });
   }
