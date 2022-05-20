@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'dart:developer' as devtools show log;
 
 import 'package:my_notes/constants/routes.dart';
+import 'package:my_notes/utilities/show_error_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({Key? key}) : super(key: key);
@@ -37,7 +38,7 @@ class _LoginViewState extends State<LoginView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('login'),
+        title: const Text('login'),
       ),
       body: Column(
         children: [
@@ -73,13 +74,25 @@ class _LoginViewState extends State<LoginView> {
                   // print(userCrendential);
                 } on FirebaseAuthException catch (e) {
                   if (e.code == 'user-not-found') {
-                    devtools.log('user-not-found');
+                    // devtools.log('user-not-found');
+                    await showErrorDialog(context, 'user not found');
                     // print('user-not-found');
                   } else if (e.code == 'wrong-password') {
-                    devtools.log('wrong passwoerd');
+                    // devtools.log('wrong passwoerd');
+                    await showErrorDialog(context, 'wrong credentials');
 
                     // print('wrong passwoerd');
+                  } else {
+                    await showErrorDialog(
+                      context,
+                      'Error: ${e.code}',
+                    );
                   }
+                } catch (e) {
+                  await showErrorDialog(
+                    context,
+                    e.toString(),
+                  );
                 }
               },
               child: const Text('Login')),
@@ -88,26 +101,9 @@ class _LoginViewState extends State<LoginView> {
                 Navigator.of(context)
                     .pushNamedAndRemoveUntil(registerRoute, (route) => false);
               },
-              child: Text('Not registered yet ? Register here !'))
+              child: const Text('Not registered yet ? Register here !'))
         ],
       ),
     );
-    // return Scaffold('/register/'
-    //   appBar: AppBar(
-    //     title: const Text('Basic Login Screen'),
-    //   ),
-    //   body: FutureBuilder(
-    //       future: Firebase.initializeApp(
-    //         options: DefaultFirebaseOptions.currentPlatform,
-    //       ),
-    //       builder: (context, snapshot) {
-    //         switch (snapshot.connectionState) {
-    //           case ConnectionState.done:
-
-    //           default:
-    //             return const Text('osLoading');
-    //         }
-    //       }),
-    // );
   }
 }
